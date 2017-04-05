@@ -19,6 +19,14 @@
 
 using namespace std;
 std::map< int, std::string > background_children;
+struct sched_param p;
+
+
+int fds[2];
+if (pipe(fds)!=) {
+    perror ("pipe:");
+    return -1;
+}
 
 // initialize static members
 const vector< string > app::builtincmds( {"set_memlimit", "cd"} );
@@ -252,53 +260,132 @@ int app::executebuiltin( std::vector< string >& command )
             LOG << "Exception occured while converting " << command[ 1 ] << " to int\n";
         }
     }
+    else if(command [0]=="set_prio"){
+
+        int sched=sched_getscheduler((pid_t) 0);
+        if ((atoi(command[1])>=sched_get_priority_min(sched)) && atoi(command[1]) <=sched_get_priority_max(sched)){
+
+        }
+        try{
+            if (setpriority(PRIO_PROCESS, 0, atoi(command[1]))<0){
+                printf("couldn't set priority");
+            }
+        } catch (...){
+            LOG << "Error occured while changing directory to " << command[ 1 ]
+                << " error was " << strerror( errno ) << std::endl;
+        }
+
+    }
+    else if (command [0] =="set_policy") {
+        std::cout << "setting policy to \n";
+        // p.sched_priority=1;
+        if (command[1] == "FIFO") {
+            p.sched_priority = 1;
+            if (sched_setscheduler((pid_t) 0, SCHED_FIFO, &p) != -1) {
+                printf("couldn't set scheduler to fifo");
+            }
+        } else if (command[1] == "RR") {
+            p.sched_priority = 1;
+            if (sched_setscheduler((pid_t) 0, SCHED_RR, &p) != -1) {
+                printf("couldn't set scheduler to round robin");
+            }
+        } else if (command[1] == "OTHER") {
+            p.sched_priority = 0;
+            if (sched_setscheduler((pid_t) 0, SCHED_OTHER, &p) != -1) {
+                printf("couldn't set scheduler to other");
+            }
+        }
+    } else if (command[0] =="get_policy"){
+        int schedpolicy= sched_getscheduler((pid_t) 0);
+        switch(schedpolicy){
+            case SCHED_FIFO:
+                printf("FIFO\n");
+                break;
+            case SCHED_RR:
+                printf("SCHED_R\n");
+                break;
+            case SCHED_OTHER:
+                printf("SCHED_OTHER\n");
+                break;
+            default:
+                printf("unknown scheduling policy sprry\n");
+        }
+
+    }
+        //struct sched_param sp;
+        //sched_setscheduler(0, SCHED_FIFO,&sp);
+
 }
+
 
 // This function is going to execute the shell command and going to execute
 // wait, if the second parameter is true;
-int app::execute( std::vector< string >& command )
-{
+int app::execute( std::vector< string >& command ) {
     int status;
 
     // Command string can contain the main command and a number of command line
     // arguments. We should allocate one extra element to have space for null.
     int commandLen = command.size();
     // If executing in background, remove "&" from command list passed to execvp
-    if ( command[ commandLen - 1 ] == "&" )
-    {
+    if (command[commandLen - 1] == "&") {
         commandLen--;
     }
-    char** args = ( char** )malloc( ( commandLen + 1 ) * sizeof( char* ) );
-    for ( int i = 0; i < commandLen; i++ )
-    {
-        args[ i ] = strdup( command[ i ].c_str() );
+    char **args = (char **) malloc((commandLen + 1) * sizeof(char *));
+    for (int i = 0; i < commandLen; i++) {
+        args[i] = strdup(command[i].c_str());
     }
-    args[ commandLen ] = 0;
+    args[commandLen] = 0;
     // create a new process
     pid_t w = fork();
-    if ( w < 0 )
-    {
+    if (w < 0) {
         LOG << "\nFork Failed " << errno << "\n";
-    }
-    else if ( w == 0 )
-    {
+    } else if (w == 0) {
         // @Task 5: Use the API to implement the memory limits
-        if ( this->virtual_memory_limit > 0 )
-        {
+        if (this->virtual_memory_limit > 0) {
             struct rlimit rl;
             rl.rlim_cur = this->virtual_memory_limit;
             rl.rlim_max = this->virtual_memory_limit;
-            if ( setrlimit( RLIMIT_AS, &rl ) == -1 )
-            {
-                LOG << "Setting rlimit failed" << strerror( errno ) << endl;
+            if (setrlimit(RLIMIT_AS, &rl) == -1) {
+                LOG << "Setting rlimit failed" << strerror(errno) << endl;
             }
         }
 
-        LOG << "Going to exec " << args[ 0 ] << "\n";
-        execvp( args[ 0 ], args );
+        LOG << "Going to exec " << args[0] << "\n";
+        execvp(args[0], args);
         LOG << "\nExec Failed " << errno << "\n";
-        exit( 2 );
-    }
-    else if ( w > 0 )
+        exit(2);
+    } else if (w > 0)
         return w;
+
+    int fds[2];
+    if (pipe(fds) != 0) {
+        perror("pipe:");
+        return -1;;
+    }
+    if (getpid() > 0) {
+        for (size_t i = 0; i < 10; ++i) {
+            close(fds[0]);
+            char buf[5];
+            int count = snprintf(buf, 5, "%lu", i);
+            write(fds[1], buf, count);
+            sleep(1);
+        }
+    } else if (getpid()==0) {
+        close(fds[1]);
+        for (;;) {
+            char buf;
+            ssize_t bytes = read(fds[0], &buf, 1);
+            if (bytes < 1) break;
+            std::cerr << buf;
+        }
+        std::cerr << "Parent closed the pipe, exiting\n";
+        exit(0);
+    }
+    //in parent
+    std:cerr << "Closing the write side of the pipe...\n";
+
+    close (fds[1]);
+   // int stat;
+    //setpid = wait(&stat);
+  return 0;
 }
