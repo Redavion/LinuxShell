@@ -1,0 +1,2 @@
+Which function(s) should the pipe stuff go into? The execute function?
+For setting priority, should we use the setpriority() function? Or should we use something else?
