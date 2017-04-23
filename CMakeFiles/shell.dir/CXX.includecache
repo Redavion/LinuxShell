@@ -23,8 +23,6 @@ string
 -
 sys/resource.h
 -
-sys/time.h
--
 sys/types.h
 -
 sys/wait.h
