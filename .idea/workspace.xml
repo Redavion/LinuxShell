@@ -12,31 +12,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="81ef4550-f799-41b7-814c-149bdaef54ab" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/Progress/2" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/Progress/count.txt" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/shell" afterPath="$PROJECT_DIR$/bin/shell" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Questions.txt" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app.cpp" afterPath="$PROJECT_DIR$/app.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app.h" afterPath="$PROJECT_DIR$/app.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/cmake-build-debug/'assignment-3'.cbp" afterPath="$PROJECT_DIR$/cmake-build-debug/'assignment-3'.cbp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeCache.txt" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeCache.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/CMakeDirectoryInformation.cmake" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/CMakeDirectoryInformation.cmake" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/CMakeOutput.log" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/CMakeOutput.log" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/Makefile.cmake" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/Makefile.cmake" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/Makefile2" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/Makefile2" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/shell.dir/CXX.includecache" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/shell.dir/CXX.includecache" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/shell.dir/build.make" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/shell.dir/build.make" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/shell.dir/depend.internal" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/shell.dir/depend.internal" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/shell.dir/depend.make" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/shell.dir/depend.make" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/shell.dir/flags.make" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/shell.dir/flags.make" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/cmake-build-debug/Makefile" afterPath="$PROJECT_DIR$/cmake-build-debug/Makefile" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.cpp" afterPath="$PROJECT_DIR$/main.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/test-background-execution.sh" afterPath="$PROJECT_DIR$/tests/test-background-execution.sh" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/test-correct-execution.sh" afterPath="$PROJECT_DIR$/tests/test-correct-execution.sh" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/test-nonexistent-program.sh" afterPath="$PROJECT_DIR$/tests/test-nonexistent-program.sh" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/test-parallel-execution.sh" afterPath="$PROJECT_DIR$/tests/test-parallel-execution.sh" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/utilities.cpp" afterPath="$PROJECT_DIR$/utilities.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/utilities.h" afterPath="$PROJECT_DIR$/utilities.h" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <ignored path="$PROJECT_DIR$/CMakeFiles/" />
@@ -56,7 +33,7 @@
       <file leaf-file-name="app.cpp" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="121">
+            <state relative-caret-position="299">
               <caret line="448" column="0" lean-forward="true" selection-start-line="448" selection-start-column="0" selection-end-line="448" selection-end-column="0" />
               <folding>
                 <element signature="e#0#20#0" expanded="true" />
@@ -141,9 +118,9 @@
   </component>
   <component name="ProjectFrameBounds">
     <option name="x" value="302" />
-    <option name="y" value="265" />
+    <option name="y" value="87" />
     <option name="width" value="1274" />
-    <option name="height" value="656" />
+    <option name="height" value="834" />
   </component>
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
@@ -390,15 +367,15 @@
       <workItem from="1492484341788" duration="193000" />
       <workItem from="1492553308270" duration="31008000" />
       <workItem from="1492713875457" duration="228000" />
-      <workItem from="1492929273799" duration="10485000" />
+      <workItem from="1492929273799" duration="10685000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="51960000" />
+    <option name="totallyTimeSpent" value="52160000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="302" y="265" width="1274" height="656" extended-state="0" />
+    <frame x="302" y="87" width="1274" height="834" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24213837" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -407,7 +384,7 @@
       <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3291592" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24966079" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.01431127" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
@@ -712,7 +689,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="121">
+        <state relative-caret-position="299">
           <caret line="448" column="0" lean-forward="true" selection-start-line="448" selection-start-column="0" selection-end-line="448" selection-end-column="0" />
           <folding>
             <element signature="e#0#20#0" expanded="true" />
