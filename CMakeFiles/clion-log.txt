@@ -1,0 +1,4 @@
+/home/vagrant/clion-2016.3.2/bin/cmake/bin/cmake -DCMAKE_BUILD_TYPE= -G "CodeBlocks - Unix Makefiles" /home/vagrant/Desktop/spring2017-assignment6-Redavion
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/vagrant/Desktop/spring2017-assignment6-Redavion

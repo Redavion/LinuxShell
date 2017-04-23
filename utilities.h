@@ -30,4 +30,5 @@ int get_exe_for_pid( pid_t pid, char* buf, size_t bufsize );
 
 bool checkforeground( std::vector< std::string >& str );
 
+bool pipeFinder( std::string command );
 #endif

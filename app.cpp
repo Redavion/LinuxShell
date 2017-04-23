@@ -6,7 +6,6 @@
 #include <string.h>
 #include <string>
 #include <sys/resource.h>
-#include <sys/time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <system_error>
@@ -16,20 +15,18 @@
 
 #include "app.h"
 #include "utilities.h"
-
+//max number of pipes
+const int COMMAND_MAX = 10;
+int totalNumberOfPipes;
 using namespace std;
 std::map< int, std::string > background_children;
 struct sched_param p;
+int pipes[(COMMAND_MAX * 2) - 1];
 
-
-int fds[2];
-if (pipe(fds)!=) {
-    perror ("pipe:");
-    return -1;
-}
 
 // initialize static members
-const vector< string > app::builtincmds( {"set_memlimit", "cd"} );
+const vector< string > app::builtincmds( {"set_memlimit", "cd", "set_policy", "set_prio", "get_policy",
+                                          "get_prio"} );
 
 void writehere( const char* msg )
 {
@@ -94,7 +91,7 @@ void signal_handler( int signum, siginfo_t* siginfo, void* ucontext )
 
 // Constructor
 app::app()
-: virtual_memory_limit( -1 )
+: virtual_memory_limit( -1 ), policy( -1 ), priority ( -1 )
 {
     struct sigaction new_action;
     new_action.sa_sigaction = signal_handler;
@@ -127,6 +124,40 @@ app::~app()
     cerr << "===============================================" << endl;
 }
 
+void app::process_parallel_command_entry(std::string &command_str, std::map<int, std::string> &children, int outfd,
+                                         int infd, int endtoclose) {
+    std::vector< string > command;
+    command.clear();
+    tokenize_string (command_str, command, " " );
+    bool isForeground= checkforeground( command );
+    //check for foreground
+    //check for background and then call execute function
+
+    //if command is built in
+    if (checkbuiltin(command)){
+        if (!isForeground){
+            //strip the &
+            command.pop_back();
+        }
+        //then execute it
+       executebuiltin(command);
+    } else { //if command isn't built in
+        if (!isForeground){ //background task
+            //strip the &
+            command.pop_back();
+            int pid = execute(command, outfd, infd, endtoclose); //execute
+            background_children[ pid ] = command [ 0 ];
+        } else {
+            int pid = execute(command, outfd, infd, endtoclose); //execute
+            children[ pid ] = command[0];
+        }
+
+    }
+    return;
+
+
+}
+
 int app::parallel_execution( std::string command_string )
 {
     std::vector< string > parallel_commands;
@@ -147,39 +178,58 @@ int app::parallel_execution( std::string command_string )
     sigaddset( &signal_set, SIGCHLD );
     sigprocmask( SIG_BLOCK, &signal_set, NULL );
 
-    for ( auto command_str : parallel_commands )
-    {
-        command.clear();
-        tokenize_string( command_str, command, " " );
-        isForeground = checkforeground( command );
+    std::vector< string > tokenizePipeCommands;
 
-        // if the command is built in, execute it (if is in background, remove
-        // leading &)
-        if ( checkbuiltin( command ) )
-        {
-            if ( !isForeground )
-            {
-                command.pop_back(); // remove & from command
+    for ( auto command_str : parallel_commands ) {
+        //if there is a | in the command
+        if (pipeFinder(command_str)) {
+            tokenizePipeCommands.clear();
+            tokenize_string(command_str, tokenizePipeCommands, "|");
+            // if the number of pipe commands falls between 2 and 10
+            if (tokenizePipeCommands.size() >= 2 && tokenizePipeCommands.size() < COMMAND_MAX) {
+                totalNumberOfPipes=tokenizePipeCommands.size()-1;
+                for (auto pipe_command_str : tokenizePipeCommands) {
+                    command.clear();
+                    tokenize_string(pipe_command_str, command, " ");
+                    isForeground = checkforeground(command);
+                    //check to make sure that the command is a foreground job and isn't built in
+                    if (!isForeground || checkbuiltin(command)) {
+                        LOG << command[0] << "can't be piped" << endl;
+                        return -1;
+                    }
+                }
+
+                //Create required number of pipes
+                for (int i = 0; i < tokenizePipeCommands.size() - 1; i++) {
+                    if (pipe(pipes + i * 2) < 0) {
+                        printf("Pipe Failed\n");
+                        return -1;
+                    }
+                }
+
+                for (int i = 0; i < tokenizePipeCommands.size(); i++) {
+                    auto command_s = tokenizePipeCommands[i];
+                    if (i == 0) {
+                        //first close the read end of the first pipe. Send STDIN_FILENO as the default read end.
+                        process_parallel_command_entry(command_s, children, pipes[1], STDIN_FILENO, pipes[0]);
+                    } else if (i == tokenizePipeCommands.size() - 1) {
+                        process_parallel_command_entry(command_s, children, STDOUT_FILENO, pipes[(i - 1) * 2],
+                                                       pipes[(i - 1) * 2 + 1]);
+                    } else {
+                        process_parallel_command_entry(command_s, children, pipes[(i * 2) + 1], pipes[(i - 1) * 2]);
+                    }
+                }
+
+                for (int i = 0; i < (tokenizePipeCommands.size() - 1) * 2; i++) {
+                    close(pipes[i]);
+                }
+
+            } else {
+                printf("invalid number of pipes");
+                return -1;
             }
-            executebuiltin( command );
-        }
-        // the command isn't built in, execute and add to wait list if it's
-        // foreground
-        else
-        {
-            if ( isForeground )
-            {
-                int pid = execute( command ); // execute process
-                children[ pid ] = command[ 0 ]; // add pid for process to be waited on
-            }
-            else
-            {
-                // This is a background task.
-                command.pop_back(); // remove & from command
-                int pid = execute( command ); // execute process
-                LOG << "added " << command[ 0 ] << " to log\n";
-                background_children[ pid ] = command[ 0 ];
-            }
+        } else {
+            process_parallel_command_entry(command_str, children);
         }
     }
 
@@ -262,67 +312,68 @@ int app::executebuiltin( std::vector< string >& command )
     }
     else if(command [0]=="set_prio"){
 
-        int sched=sched_getscheduler((pid_t) 0);
-        if ((atoi(command[1])>=sched_get_priority_min(sched)) && atoi(command[1]) <=sched_get_priority_max(sched)){
-
-        }
-        try{
-            if (setpriority(PRIO_PROCESS, 0, atoi(command[1]))<0){
-                printf("couldn't set priority");
-            }
-        } catch (...){
-            LOG << "Error occured while changing directory to " << command[ 1 ]
-                << " error was " << strerror( errno ) << std::endl;
+        int sched = sched_getscheduler((pid_t) 0);
+        int prio = std::stoi(command[1]);
+        //Make sure priority is within bounds of min and max
+        if (prio >= sched_get_priority_min(sched) || prio <= sched_get_priority_max(sched)){
+            priority = prio;
+        } else {
+            printf("Priority is invalid");
         }
 
     }
     else if (command [0] =="set_policy") {
-        std::cout << "setting policy to \n";
+        std::cout << "Setting policy to " << command[1] << "\n";
         // p.sched_priority=1;
         if (command[1] == "FIFO") {
-            p.sched_priority = 1;
+            //so instead of all this we just do a direct store?
+           /* p.sched_priority = 1;
             if (sched_setscheduler((pid_t) 0, SCHED_FIFO, &p) != -1) {
                 printf("couldn't set scheduler to fifo");
-            }
+            }*/
+            policy = SCHED_FIFO;
         } else if (command[1] == "RR") {
-            p.sched_priority = 1;
-            if (sched_setscheduler((pid_t) 0, SCHED_RR, &p) != -1) {
-                printf("couldn't set scheduler to round robin");
-            }
+
+            policy = SCHED_RR;
+
         } else if (command[1] == "OTHER") {
-            p.sched_priority = 0;
-            if (sched_setscheduler((pid_t) 0, SCHED_OTHER, &p) != -1) {
-                printf("couldn't set scheduler to other");
-            }
+
+            policy = SCHED_OTHER;
         }
+        //set the default priority
+        priority = sched_get_priority_min(policy);
     } else if (command[0] =="get_policy"){
+        //printing out policy
         int schedpolicy= sched_getscheduler((pid_t) 0);
+        printf("The scheduling policy is: ");
         switch(schedpolicy){
             case SCHED_FIFO:
                 printf("FIFO\n");
                 break;
             case SCHED_RR:
-                printf("SCHED_R\n");
+                printf("ROUNDROBIN\n");
                 break;
             case SCHED_OTHER:
-                printf("SCHED_OTHER\n");
+                printf("OTHER\n");
                 break;
             default:
-                printf("unknown scheduling policy sprry\n");
+                printf("unknown\n");
         }
 
+    } else if (command[0]=="get_prio"){
+        //can this just be cout prio?
+
+         cout << "Current priority: " << priority << "\n";
+
     }
-        //struct sched_param sp;
-        //sched_setscheduler(0, SCHED_FIFO,&sp);
 
 }
 
 
 // This function is going to execute the shell command and going to execute
 // wait, if the second parameter is true;
-int app::execute( std::vector< string >& command ) {
+int app::execute( std::vector< string >& command, int outfd, int infd, int endtoclose ) {
     int status;
-
     // Command string can contain the main command and a number of command line
     // arguments. We should allocate one extra element to have space for null.
     int commandLen = command.size();
@@ -339,7 +390,11 @@ int app::execute( std::vector< string >& command ) {
     pid_t w = fork();
     if (w < 0) {
         LOG << "\nFork Failed " << errno << "\n";
+    } else if (w > 0) {
+        //parent process
+        return w;
     } else if (w == 0) {
+        //we are the child process
         // @Task 5: Use the API to implement the memory limits
         if (this->virtual_memory_limit > 0) {
             struct rlimit rl;
@@ -349,43 +404,52 @@ int app::execute( std::vector< string >& command ) {
                 LOG << "Setting rlimit failed" << strerror(errno) << endl;
             }
         }
+        //set priority and policy after fork
+        if (priority != -1) {
+            if (policy != SCHED_OTHER) {
+                struct sched_param p;
+                p.sched_priority = priority;
+                if (sched_setscheduler((pid_t) 0, SCHED_FIFO, &p) == -1) {
+                    printf("Couldn't set scheduler to SCHED_FIFO\n");
+                }
+            }
+            if (setpriority(PRIO_PROCESS, 0, priority) == -1) {
+                    printf("Setting priority failed\n");
+            }
 
-        LOG << "Going to exec " << args[0] << "\n";
+         }
+        //if the outfd is not STDOUT_FILENO, then you should duplicate stdout to outfd
+        if (outfd != STDOUT_FILENO) {
+            dup2(outfd, STDOUT_FILENO);
+        }
+
+        //if the infd is not STDIN_FILENO, then you should duplicate stdin to infd
+        if (infd != STDIN_FILENO) {
+            dup2(infd, STDIN_FILENO);
+        }
+
+
+        //close endtoclose if it is not -1, which is the default -
+        // check the declaration of process_parallel_command_entry
+        if (endtoclose != -1) {
+            close(endtoclose);
+        }
+        for ( int i = 0; i < totalNumberOfPipes; i++ )
+        {
+            if(pipes[i*2]!=endtoclose && pipes[i*2+1]!=outfd && pipes[i*2]!=infd){
+                close(pipes[i*2]);
+            }
+            if(pipes[i*2+1]!=endtoclose &&pipes[i*2+1]!=outfd && pipes[i*2+1]!=infd){
+                close(pipes[i*2+1]);
+            }
+        }
         execvp(args[0], args);
-        LOG << "\nExec Failed " << errno << "\n";
+        printf("Exec Failed\n");
         exit(2);
-    } else if (w > 0)
-        return w;
 
-    int fds[2];
-    if (pipe(fds) != 0) {
-        perror("pipe:");
-        return -1;;
     }
-    if (getpid() > 0) {
-        for (size_t i = 0; i < 10; ++i) {
-            close(fds[0]);
-            char buf[5];
-            int count = snprintf(buf, 5, "%lu", i);
-            write(fds[1], buf, count);
-            sleep(1);
-        }
-    } else if (getpid()==0) {
-        close(fds[1]);
-        for (;;) {
-            char buf;
-            ssize_t bytes = read(fds[0], &buf, 1);
-            if (bytes < 1) break;
-            std::cerr << buf;
-        }
-        std::cerr << "Parent closed the pipe, exiting\n";
-        exit(0);
-    }
-    //in parent
-    std:cerr << "Closing the write side of the pipe...\n";
 
-    close (fds[1]);
-   // int stat;
-    //setpid = wait(&stat);
-  return 0;
+
 }
+
+

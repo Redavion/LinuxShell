@@ -2,7 +2,7 @@
 #include <memory>
 #include <vector>
 #include <string>
-
+#include <unistd.h>
 #include "app.h"
 #include "utilities.h"
 

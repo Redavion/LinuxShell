@@ -1,0 +1,4 @@
+/home/vagrant/Desktop/spring2017-assignment6-Redavion/CMakeFiles/test.dir
+/home/vagrant/Desktop/spring2017-assignment6-Redavion/CMakeFiles/edit_cache.dir
+/home/vagrant/Desktop/spring2017-assignment6-Redavion/CMakeFiles/rebuild_cache.dir
+/home/vagrant/Desktop/spring2017-assignment6-Redavion/CMakeFiles/shell.dir

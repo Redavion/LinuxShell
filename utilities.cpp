@@ -62,3 +62,12 @@ bool checkforeground( std::vector< std::string >& str )
 
     return trim( str[ i - 1 ] ) != "&";
 }
+
+bool pipeFinder(std::string command){
+    for (int i=0; i< command.size();i++){
+        if (command[i]=='|'){
+            return true;
+        }
+    }
+    return false;
+}
