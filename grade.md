@@ -5,7 +5,7 @@ If you have any questions please email me at christopher.w.acker@vanderbilt.edu.
 -5 : built-in commands will not always require two arguments (the get functions)
 
 17 points: implement the get policy builtin
-	-3: get the policy from the global policy variable
+	-0
  
 17 points: implement the set priority builtin
 	-0
@@ -14,7 +14,7 @@ If you have any questions please email me at christopher.w.acker@vanderbilt.edu.
 	-0
  
 17 points: implement the get priority builtin
-	-3 : get the priority from the global priority builtin
+	-0
  
 17 points: implement piped execution of foreground jobs
 	-0
@@ -25,4 +25,4 @@ If you have any questions please email me at christopher.w.acker@vanderbilt.edu.
 5 points:  style/comments/documentation
 	-0
  
-Total: 89/100
+Total: 95/100
